@@ -10,12 +10,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Celo Coin Flip Game",
     description: "Play coin flip on Celo network and win 2x your bet!",
-    images: [`${appUrl}/og-image.png`],
+    images: [`${appUrl}/og-image.svg`],
   },
   other: {
     // Farcaster Frame metadata
     'fc:frame': 'vNext',
-    'fc:frame:image': `${appUrl}/og-image.png`,
+    'fc:frame:image': `${appUrl}/og-image.svg`,
     'fc:frame:button:1': 'Play Coin Flip',
     'fc:frame:button:1:action': 'link',
     'fc:frame:button:1:target': appUrl,

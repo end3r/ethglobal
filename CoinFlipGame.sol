@@ -4,6 +4,13 @@ pragma solidity ^0.8.24;
 /**
  * @title CoinFlipGame
  * @dev A simple coin flip game where players can bet and win or lose
+ * 
+ * SECURITY NOTICE: This is a demonstration contract for ETH Global Buenos Aires.
+ * The randomness implementation using block data is NOT suitable for production
+ * use with real funds. For production deployment, integrate Chainlink VRF or
+ * implement a commit-reveal scheme for provably fair randomness.
+ * 
+ * For hackathon/demo purposes only!
  */
 contract CoinFlipGame {
     address public owner;
@@ -36,6 +43,11 @@ contract CoinFlipGame {
     /**
      * @dev Play the coin flip game
      * @param choice Player's choice (true for heads, false for tails)
+     * 
+     * WARNING: This contract uses pseudo-random number generation based on block data.
+     * This is NOT secure for production use as miners/validators can potentially
+     * manipulate the outcome. For production, implement Chainlink VRF or a 
+     * commit-reveal scheme for provably fair randomness.
      */
     function play(bool choice) external payable {
         require(msg.value >= minimumBet, "Bet amount too low");
