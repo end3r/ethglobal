@@ -51,7 +51,13 @@ contract CoinFlipGame {
      */
     function play(bool choice) external payable {
         require(msg.value >= minimumBet, "Bet amount too low");
-        require(address(this).balance >= msg.value * 2, "Insufficient contract balance");
+        
+        // Calculate potential payout considering house edge
+        uint256 potentialWinnings = msg.value * 2;
+        uint256 fee = (potentialWinnings * houseEdge) / 10000;
+        uint256 potentialPayout = potentialWinnings - fee;
+        
+        require(address(this).balance >= potentialPayout, "Insufficient contract balance");
         
         // Simple pseudo-random number generation
         // Note: In production, use Chainlink VRF or similar for true randomness
@@ -65,10 +71,7 @@ contract CoinFlipGame {
         uint256 payout = 0;
         
         if (playerWon) {
-            // Calculate payout with house edge
-            uint256 winnings = msg.value * 2;
-            uint256 fee = (winnings * houseEdge) / 10000;
-            payout = winnings - fee;
+            payout = potentialPayout;
             
             (bool success, ) = payable(msg.sender).call{value: payout}("");
             require(success, "Transfer failed");

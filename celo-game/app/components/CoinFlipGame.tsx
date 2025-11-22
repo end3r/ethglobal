@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAccount, useConnect, useDisconnect, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther, formatEther } from 'viem';
 import { CONTRACT_ADDRESS } from '../config/wagmi';
@@ -56,16 +56,24 @@ export function CoinFlipGame() {
     hash,
   });
 
+  const isContractConfigured = !!(CONTRACT_ADDRESS && CONTRACT_ADDRESS !== '0x0000000000000000000000000000000000000000');
+
   const { data: contractBalance } = useReadContract({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: GAME_ABI,
     functionName: 'getBalance',
+    query: {
+      enabled: isContractConfigured,
+    },
   });
 
   const { data: minimumBet } = useReadContract({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: GAME_ABI,
     functionName: 'minimumBet',
+    query: {
+      enabled: isContractConfigured,
+    },
   });
 
   const handleFlip = async (choice: boolean) => {
@@ -92,9 +100,11 @@ export function CoinFlipGame() {
   };
 
   // Update game result when transaction is confirmed
-  if (isSuccess && gameResult === '') {
-    setGameResult('Game played! Check transaction for results.');
-  }
+  useEffect(() => {
+    if (isSuccess) {
+      setGameResult('Game played! Check transaction for results.');
+    }
+  }, [isSuccess]);
 
   return (
     <div className="flex flex-col items-center gap-8 w-full max-w-2xl mx-auto p-8">
@@ -104,6 +114,12 @@ export function CoinFlipGame() {
           A simple coin flip game on Celo network. Pick heads or tails and win 2x your bet!
         </p>
       </div>
+
+      {!isContractConfigured && (
+        <div className="w-full p-4 bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100 rounded-lg">
+          ⚠️ Contract address not configured. Please deploy the contract and update NEXT_PUBLIC_CONTRACT_ADDRESS in .env.local
+        </div>
+      )}
 
       <div className="flex flex-col gap-4">
         {isConnected ? (
@@ -166,14 +182,14 @@ export function CoinFlipGame() {
           <div className="flex gap-4">
             <button
               onClick={() => handleFlip(true)}
-              disabled={isPending || isConfirming}
+              disabled={!isContractConfigured || isPending || isConfirming}
               className="flex-1 py-4 px-6 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-400 text-white font-semibold rounded-lg transition-colors"
             >
               {selectedSide === true && isPending ? '🔄 Flipping...' : '👑 Heads'}
             </button>
             <button
               onClick={() => handleFlip(false)}
-              disabled={isPending || isConfirming}
+              disabled={!isContractConfigured || isPending || isConfirming}
               className="flex-1 py-4 px-6 bg-green-600 hover:bg-green-700 disabled:bg-zinc-400 text-white font-semibold rounded-lg transition-colors"
             >
               {selectedSide === false && isPending ? '🔄 Flipping...' : '🦅 Tails'}
